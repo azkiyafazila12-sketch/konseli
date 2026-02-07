@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TopOne Care - Konseli</title>
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #ff8fb1, #7ecbff);
+    min-height: 100vh;
+    color: #333;
+}
+header {
+    background: rgba(255,255,255,0.9);
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 22px;
+}
+.container { padding: 15px; }
+.card {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+button {
+    background: linear-gradient(135deg, #ff6fa1, #5ab9ff);
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+button:hover { transform: scale(1.03); }
+textarea, input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    margin-top: 8px;
+}
+.hidden { display: none; }
+.nav { display: flex; gap: 10px; margin-bottom:10px; }
+.nav button { flex: 1; font-size: 14px; }
+.notif { color:red; font-weight:bold; animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity:0; } }
+</style>
+</head>
+<body>
+
+<header>TopOne Care 💙💗</header>
+
+<div class="container">
+
+<div class="nav">
+<button onclick="showMenu('home')">Beranda</button>
+<button onclick="showMenu('konsul')">Konsul</button>
+<button onclick="showMenu('riwayat')">Riwayat</button>
+</div>
+
+<!-- Beranda -->
+<div id="home" class="card">
+    <h3>Selamat Datang 🤍</h3>
+    <p id="motivasi"></p>
+    <button onclick="showMenu('konsul')">Mulai Curhat</button>
+</div>
+
+<!-- Konsul -->
+<div id="konsul" class="card hidden">
+    <h3>Curhat Anonim</h3>
+    <textarea id="curhatText" placeholder="Ceritakan perasaanmu..."></textarea>
+    <button onclick="kirimCurhat()">Kirim Curhat</button>
+</div>
+
+<!-- Riwayat -->
+<div id="riwayat" class="card hidden">
+    <h3>Riwayat Konsul</h3>
+    <div id="riwayatList"></div>
+</div>
+
+</div>
+
+<script>
+// Motivasi random
+const motivasiList = [
+"Kamu tidak sendiri 🤍",
+"Perasaanmu valid",
+"Berani bercerita itu kuat",
+"Kami ada untukmu",
+"Kamu berharga"
+];
+document.getElementById("motivasi").innerText = motivasiList[Math.floor(Math.random()*motivasiList.length)];
+
+// Menu konseli
+function showMenu(menu){
+    ['home','konsul','riwayat'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+    document.getElementById(menu).classList.remove('hidden');
+    if(menu=='riwayat') loadRiwayat();
+}
+
+// Kirim curhat
+function kirimCurhat(){
+    let text = document.getElementById("curhatText").value.trim();
+    if(!text) return alert("Isi curhat dulu ya 🤍");
+    let data = JSON.parse(localStorage.getItem("curhat")||"[]");
+    data.push({id:Date.now(),pesan:text,jawaban:"",waktu:Date.now()});
+    localStorage.setItem("curhat",JSON.stringify(data));
+    document.getElementById("curhatText").value="";
+    alert("Curhat terkirim 🤍");
+}
+
+// Load riwayat konsul
+function loadRiwayat(){
+    let list = document.getElementById("riwayatList");
+    list.innerHTML="";
+    let data = JSON.parse(localStorage.getItem("curhat")||"[]");
+    data.forEach(d=>{
+        let status = d.jawaban?"Sudah dibalas":"Menunggu";
+        let notif = d.jawaban?`<span class="notif">Balasan Baru!</span>`:"";
+        list.innerHTML += `<p><b>Cerita:</b> ${d.pesan}<br><b>Status:</b> ${status} ${notif}<br><b>Balasan:</b> ${d.jawaban||"-"}</p><hr>`;
+    });
+}
+
+// Auto reload notifikasi setiap 5 detik
+setInterval(()=>{
+    if(!document.getElementById("riwayat").classList.contains("hidden")){
+        loadRiwayat();
+    }
+},5000);
+</script>
+
+</body>
+</html>
